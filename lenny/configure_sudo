@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [ "$USER" != "root" ]; then
+  echo "Must be root"
+  exit 1
+fi
+
+if [ -z "$1" ]; then
+  echo "usage: $0 <user>"
+  exit 1
+fi
+
+user=$1
+
+apt-get install --assume-yes sudo
+grep $user /etc/sudoers || echo "mike ALL=(ALL) ALL" >>/etc/sudoers
+
