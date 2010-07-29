@@ -15,4 +15,6 @@ sudo ruby setup.rb
 cd ..
 rm -r $archive $dir
 
+sudo ln -s gem1.8 /usr/bin/gem
+
 [ -e ~/.gemrc ] || echo "gem: --bindir /usr/local/bin --no-ri --no-rdoc" >~/.gemrc
