@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "usage: $0 <user@host>"
+  exit 1
+fi
+
+key=$(<~/.ssh/id_dsa.pub)
+
+ssh $1 <<EOF
+mkdir -p .ssh
+chmod 700 .ssh
+cd .ssh
+echo $key >>authorized_keys
+chmod 600 authorized_keys
+EOF
