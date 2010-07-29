@@ -13,5 +13,5 @@ fi
 user=$1
 
 apt-get install --assume-yes sudo
-grep $user /etc/sudoers || echo "mike ALL=(ALL) ALL" >>/etc/sudoers
+grep $user /etc/sudoers || echo "$user ALL=(ALL) ALL" >>/etc/sudoers
 
