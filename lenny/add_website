@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+if ARGV.size < 3
+  raise "usage: #$0 <document root> <admin email> <hostname> [<aliases...>]"
+end
+
+root, email, hostname, *aliases = ARGV
+
+aliases = aliases.map do |host_alias|
+  "  ServerAlias #{host_alias}"
+end.join("\n")
+
+config = "
+<VirtualHost *:80>
+  ServerAdmin #{email}
+  ServerName #{hostname}
+#{aliases}
+
+  DocumentRoot #{root}
+  ErrorLog  /var/log/apache2/#{hostname}.error.log
+  CustomLog /var/log/apache2/#{hostname}.access.log combined
+
+</VirtualHost>
+"
+
+config_file = "/etc/apache2/sites-available/#{hostname}"
+
+puts "writing configuration to #{config_file}"
+system "sudo tee #{config_file} <<EOF
+#{config}
+"
+
+puts "enable site in apache..."
+system "sudo a2ensite #{hostname}"
+
+puts "reloading apache..."
+system "sudo /etc/init.d/apache2 reload"
