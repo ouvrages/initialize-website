@@ -4,11 +4,11 @@ require 'rubygems'
 require 'highline/import'
 require 'active_record'
 
-if ARGV.size != 2
-  raise "usage: #$0 <user> <password>"
+if ARGV.size != 2 and ARGV.size != 3
+  raise "usage: #$0 <user> <password> [<dump file to load>]"
 end
 
-user, password = ARGV
+user, password, dump_file = ARGV
 database = user
 
 root_password = ask("Mysql root password: ") { |q| q.echo = false }
@@ -38,3 +38,9 @@ grant_statement = "GRANT ALL PRIVILEGES ON
 
 ActiveRecord::Base.connection.create_database(database, creation_options)
 ActiveRecord::Base.connection.execute grant_statement
+
+if dump_file
+  command = "mysql -u #{user} --password=\"#{password}\" #{user} <#{dump_file}"
+  puts command
+  system command
+end
