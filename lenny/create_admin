@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -x
+
+if [ "$USER" != "root" ]; then
+  echo "Must be root"
+  exit 1
+fi
+
+if [ -z "$1" ]; then
+  echo "usage: $0 <user>"
+  exit 1
+fi
+
+user=$1
+
+adduser $user --gecos ''
+ssh=/home/$user/.ssh
+mkdir $ssh
+chmod 700 $ssh
+chown $user:$user $ssh
+
+if [ ! -e $ssh/authorized_keys ]; then
+  cat ~/.ssh/authorized_keys $ssh/authorized_keys
+  chmod 700 $ssh/authorized_keys
+  chown $user:$user $ssh/authorized_keys
+fi
+
+apt-get install --assume-yes sudo
+grep $user /etc/sudoers || echo "$user ALL=(ALL) ALL" >>/etc/sudoers
+
