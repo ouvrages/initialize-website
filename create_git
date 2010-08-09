@@ -1,0 +1,19 @@
+#!/bin/sh
+
+remote="$1"
+shift
+path="$1"
+shift
+options="$@"
+
+if [ -z "$remote" -o -z "$path" ]; then
+  echo "usage: $0 <user@hostname> <path> [<git init options...>]"
+  exit 1
+fi
+
+ssh $remote <<EOF
+  set -x
+  mkdir -p $path
+  cd $path
+  git init $options
+EOF
