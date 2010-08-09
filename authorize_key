@@ -1,17 +1,23 @@
 #!/bin/bash
 
-if [ -z "$1" ]; then
-  echo "usage: $0 <user@host> [<public key>]"
+remote="$1"
+shift
+key="$@"
+
+if [ -z "$remote" ]; then
+  echo "usage: $0 <user@host> [<public key or public key file>]"
   exit 1
 fi
 
-key_file=~/.ssh/id_dsa.pub
-[ -z "$2" ] || key_file=$2
-key=$(<$key_file)
+if [ -z "$key" ]; then
+  key=$(<~/.ssh/id_dsa.pub)
+elif [ -e "$key" ]; then
+  key=$(<$key_file)
+fi
 
 echo $key
 
-ssh $1 <<EOF
+ssh $remote <<EOF
 mkdir -p .ssh
 chmod 700 .ssh
 cd .ssh
