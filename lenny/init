@@ -1,0 +1,31 @@
+#!/bin/sh
+
+host="$1"
+shift
+admin="$1"
+shift
+repository="$1"
+
+if [ -z "$host" -o -z "$admin" ]; then
+  echo "$0 <host> <admin user> [<repository>]"
+  exit 1
+fi
+
+[ -z "$repository" ] && repository="git@github.com:piglop/initialize-website.git"
+
+set -x
+
+../authorize_key root@$host
+ssh -t root@$host <<EOF
+  apt-get install -y git-core
+  ssh-keyscan -H github.com >~/.ssh/known_hosts
+  git clone $repository
+  cd initialize-website
+  cd lenny
+  ./create_admin $admin
+EOF
+
+ssh -t $admin@$host <<EOF
+  ssh-keyscan -H github.com >~/.ssh/known_hosts
+  git clone $repository
+EOF
