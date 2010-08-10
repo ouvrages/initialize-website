@@ -17,6 +17,7 @@ set -x
 
 ../authorize_key root@$host
 ssh -t root@$host <<EOF
+  apt-get update
   apt-get install -y git-core
   ssh-keyscan -H github.com >>~/.ssh/known_hosts
   git clone $repository
