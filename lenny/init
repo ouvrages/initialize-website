@@ -1,13 +1,10 @@
 #!/bin/sh
 
 host="$1"
-shift
-admin="$1"
-shift
-repository="$1"
+repository="$2"
 
-if [ -z "$host" -o -z "$admin" ]; then
-  echo "$0 <host> <admin user> [<repository>]"
+if [ -z "$host" ]; then
+  echo "$0 <host> [<repository>]"
   exit 1
 fi
 
