@@ -29,3 +29,5 @@ fi
 apt-get install --assume-yes sudo
 grep $user /etc/sudoers || echo "$user ALL=(ALL) ALL" >>/etc/sudoers
 
+ssh-keyscan -H github.com >>$ssh/.ssh/known_hosts
+su $user -c "cd ~ && git clone $repository"

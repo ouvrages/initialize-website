@@ -21,12 +21,5 @@ ssh -t root@$host <<EOF
   apt-get install -y git-core
   ssh-keyscan -H github.com >>~/.ssh/known_hosts
   git clone $repository
-  cd initialize-website
-  cd lenny
-  ./create_admin $admin
 EOF
 
-ssh -t $admin@$host <<EOF
-  ssh-keyscan -H github.com >>~/.ssh/known_hosts
-  git clone $repository
-EOF
