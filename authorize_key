@@ -12,7 +12,7 @@ fi
 if [ -z "$key" ]; then
   key=$(<~/.ssh/id_dsa.pub)
 elif [ -e "$key" ]; then
-  key=$(<$key_file)
+  key=$(<$key)
 fi
 
 echo $key
