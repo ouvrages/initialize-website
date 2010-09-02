@@ -1,0 +1,26 @@
+#!/bin/sh
+
+host="$1"
+repository="$2"
+dir="$3"
+
+if [ -z "$host" -o -z "$repository" -o -z "$dir" ]; then
+  echo "$0 <user@host> <repository> <destination directory>"
+  exit 1
+fi
+
+hook=".git/hooks/post-receive"
+
+ssh -t $host <<EOF
+  set -x
+  git clone $repository $dir
+  set -e
+  cd $dir
+  cat >$hook <<EOF2
+#!/bin/sh
+cd ..
+env -i git reset --hard
+EOF2
+  chmod +x $hook
+EOF
+
