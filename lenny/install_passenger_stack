@@ -6,7 +6,7 @@ else
   sudo="sudo"
 fi
 
-$sudo apt-get install -y ruby-dev build-essential libopenssl-ruby apache2-prefork-dev libapr1-dev libaprutil1-dev
+$sudo apt-get install -y ruby-dev build-essential libopenssl-ruby apache2-prefork-dev libapr1-dev libaprutil1-dev apache2-mpm-prefork
 
 if [ ! -e /usr/lib/ruby/gems/1.8/gems/passenger-*/ext/apache2/mod_passenger.so ]; then
   which passenger-install-apache2-module >/dev/null || $sudo gem install passenger
