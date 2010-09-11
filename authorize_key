@@ -21,6 +21,6 @@ ssh $remote <<EOF
 mkdir -p .ssh
 chmod 700 .ssh
 cd .ssh
-echo $key >>authorized_keys
+grep "$key" authorized_keys >/dev/null 2>&1 || echo $key >>authorized_keys
 chmod 600 authorized_keys
 EOF
