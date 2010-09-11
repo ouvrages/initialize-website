@@ -6,16 +6,22 @@ end
 
 user, authorized_keys_file = ARGV
 
-puts "creating user #{user}"
-system "sudo adduser #{user} --disabled-password --gecos ''"
+if ENV["USER"] == "root"
+  sudo = ""
+else
+  sudo = "sudo"
+end
 
-system "sudo mkdir /home/#{user}/.ssh "
-system "sudo chmod 700 /home/#{user}/.ssh"
-system "sudo chown #{user}:#{user} /home/#{user}/.ssh"
+puts "creating user #{user}"
+system "#{sudo} adduser #{user} --disabled-password --gecos ''"
+
+system "#{sudo} mkdir /home/#{user}/.ssh "
+system "#{sudo} chmod 700 /home/#{user}/.ssh"
+system "#{sudo} chown #{user}:#{user} /home/#{user}/.ssh"
 
 if authorized_keys_file
   puts "copying ssh authorized keys from #{authorized_keys_file}"
-  system "sudo cp #{authorized_keys_file} /home/#{user}/.ssh/authorized_keys"
-  system "sudo chmod 600 /home/#{user}/.ssh/authorized_keys"
-  system "sudo chown #{user}:#{user} /home/#{user}/.ssh/authorized_keys"
+  system "#{sudo} cp #{authorized_keys_file} /home/#{user}/.ssh/authorized_keys"
+  system "#{sudo} chmod 600 /home/#{user}/.ssh/authorized_keys"
+  system "#{sudo} chown #{user}:#{user} /home/#{user}/.ssh/authorized_keys"
 end
