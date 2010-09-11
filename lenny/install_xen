@@ -1,0 +1,13 @@
+#!/bin/sh
+
+packages="
+linux-image-2.6.26-2-xen-686
+xen-linux-system-2.6.26-1-xen-686
+xen-tools
+drbd8-utils
+drbd8-modules-2.6-xen-686
+lvm2
+"
+
+apt-get install $packages
+
