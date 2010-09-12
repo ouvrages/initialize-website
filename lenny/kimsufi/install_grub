@@ -1,0 +1,14 @@
+#!/bin/sh
+
+apt-get install grub
+
+grub-install --recheck /dev/sda
+
+grub --batch <<EOF
+root (hd0,0)
+find /boot/grub/stage2
+setup (hd0)
+quit
+EOF
+
+echo "GRUB installed. Install a kernel (OVH base kernel is not detected)."
