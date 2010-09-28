@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+apt-get remove ganeti-instance-debootstrap
+
+cd /usr/local/src/
+wget http://ganeti.googlecode.com/files/ganeti-instance-debootstrap-0.9.tar.gz
+tar xzf ganeti-instance-debootstrap-0.9.tar.gz
+cd ganeti-instance-debootstrap-0.9
+./configure --prefix=/usr
+make
+make install

@@ -36,7 +36,7 @@ packages = %w(
   lvm2 ssh bridge-utils iproute iputils-arping
   python python-pyopenssl openssl python-pyparsing
   python-simplejson python-pyinotify socat
-  ganeti2 ganeti-instance-debootstrap debootstrap dump kpartx
+  ganeti2 debootstrap dump kpartx
 )
 
 system "apt-get", "install", "-y", *packages
