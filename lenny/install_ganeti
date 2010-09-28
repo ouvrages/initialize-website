@@ -36,7 +36,7 @@ packages = %w(
   lvm2 ssh bridge-utils iproute iputils-arping
   python python-pyopenssl openssl python-pyparsing
   python-simplejson python-pyinotify socat
-  ganeti2
+  ganeti2 ganeti-instance-debootstrap debootstrap dump kpartx
 )
 
 system "apt-get", "install", "-y", *packages
@@ -88,6 +88,7 @@ if drbd.gsub! /^resource /, "skip resource "
   File.write("/etc/drbd.conf", drbd)
 end
 
+if false
 interfaces = File.read("/etc/network/interfaces")
 unless interfaces =~ /xen-br0/
   interfaces << "
@@ -109,7 +110,18 @@ iface xen-br0 inet static
   File.write "/etc/network/interfaces", interfaces
   raise "You must edit your network config in /etc/network/interfaces (comments have been added to it) and restart this script"
 end
-
-unless system("ip a show xen-br0") and system("brctl show xen-br0")
-  raise "xen-br0 bridge is not active. Fix that first."
 end
+
+bridge = %x(brctl show).split("\n")[1].split.first
+if bridge == ""
+  raise "No bridge found."
+end
+puts "first bridge is #{bridge.inspect}. I'll use it."
+
+unless system "vgs xenvg"
+  raise "Need xenvg vgs"
+end
+
+update_config "/etc/lvm/lvm.conf", /filter = \[.+\]/, 'filter = [ "r|/dev/cdrom|", "r|/dev/drbd[0-9]+|" ]'
+
+puts "Installation done. Now initialize the cluster. See http://docs.ganeti.org/ganeti/current/html/install.html#initializing-the-cluster"
