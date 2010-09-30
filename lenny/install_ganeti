@@ -62,7 +62,7 @@ if update_config "/etc/default/xendomains", /XENDOMAINS_SAVE=.+$/, 'XENDOMAINS_S
 end
 
 grub_updated = false
-grub_updated = true if update_config "/boot/grub/menu.lst", /# xenhopt=.*$/, '# xenhopt=dom0_mem=128M'
+grub_updated = true if update_config "/boot/grub/menu.lst", /# xenhopt=.*$/, '# xenhopt=dom0_mem=512M'
 grub_updated = true if update_config "/boot/grub/menu.lst", /# xenkopt=.*$/, '# xenkopt=console=tty0 nosmp'
 if grub_updated
   system "update-grub" if grub_updated
