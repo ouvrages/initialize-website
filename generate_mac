@@ -1,0 +1,10 @@
+#!/bin/sh
+
+name=$1
+
+if [ -z "$1" ]; then
+  echo "usage: $0 <hostname>"
+  exit 1
+fi
+
+echo "$name" | sha1sum | sed -e "s/^\(..\)\(..\)\(..\).\+/00:16:3e:\1:\2:\3/"
