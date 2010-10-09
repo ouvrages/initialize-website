@@ -112,12 +112,6 @@ iface xen-br0 inet static
 end
 end
 
-bridge = %x(brctl show).split("\n")[1].split.first
-if bridge == ""
-  raise "No bridge found."
-end
-puts "first bridge is #{bridge.inspect}. I'll use it."
-
 unless system "vgs xenvg"
   raise "Need xenvg vgs"
 end
