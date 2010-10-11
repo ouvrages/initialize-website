@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ "$USER" == "root" ]; then
+if [ "$USER" = "root" ]; then
   sudo=""
 else
   sudo="sudo"
@@ -12,6 +12,7 @@ $sudo apt-get install -y ruby ruby-dev
 archive=rubygems-1.3.7.tgz
 dir=`basename $archive .tgz`
 
+TMP=${TMP:-/tmp}
 cd $TMP
 wget http://production.cf.rubygems.org/rubygems/$archive || exit 1
 
