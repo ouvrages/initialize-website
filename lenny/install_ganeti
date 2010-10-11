@@ -62,8 +62,8 @@ if update_config "/etc/default/xendomains", /XENDOMAINS_SAVE=.+$/, 'XENDOMAINS_S
 end
 
 grub_updated = false
-grub_updated = true if update_config "/boot/grub/menu.lst", /# xenhopt=.*$/, '# xenhopt=dom0_mem=128M'
-grub_updated = true if update_config "/boot/grub/menu.lst", /# xenkopt=.*$/, '# xenkopt=console=tty0 nosmp'
+grub_updated = true if update_config "/boot/grub/menu.lst", /# xenhopt=.*$/, '# xenhopt=dom0_mem=512M'
+#grub_updated = true if update_config "/boot/grub/menu.lst", /# xenkopt=.*$/, '# xenkopt=console=tty0 nosmp'
 if grub_updated
   system "update-grub" if grub_updated
   raise "Grub config updated. You must reboot and restart this script."
@@ -112,12 +112,6 @@ iface xen-br0 inet static
 end
 end
 
-bridge = %x(brctl show).split("\n")[1].split.first
-if bridge == ""
-  raise "No bridge found."
-end
-puts "first bridge is #{bridge.inspect}. I'll use it."
-
 unless system "vgs xenvg"
   raise "Need xenvg vgs"
 end
@@ -125,3 +119,5 @@ end
 update_config "/etc/lvm/lvm.conf", /filter = \[.+\]/, 'filter = [ "r|/dev/cdrom|", "r|/dev/drbd[0-9]+|" ]'
 
 puts "Installation done. Now initialize the cluster. See http://docs.ganeti.org/ganeti/current/html/install.html#initializing-the-cluster"
+
+puts "For example: gnt-cluster init --nic-parameters link=#{bridge} --master-netdev #{bridge} --no-etc-hosts <cluster hostname>"
