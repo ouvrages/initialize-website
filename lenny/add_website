@@ -6,6 +6,12 @@ end
 
 root, email, hostname, *aliases = ARGV
 
+if ENV["USER"] == "root"
+  sudo = ""
+else
+  sudo = "sudo"
+end
+
 aliases = aliases.map do |host_alias|
   "  ServerAlias #{host_alias}"
 end.join("\n")
@@ -26,12 +32,12 @@ config = "
 config_file = "/etc/apache2/sites-available/#{hostname}"
 
 puts "writing configuration to #{config_file}"
-system "sudo tee #{config_file} <<EOF
+system "#{sudo} tee #{config_file} <<EOF
 #{config}
 "
 
 puts "enable site in apache..."
-system "sudo a2ensite #{hostname}"
+system "#{sudo} a2ensite #{hostname}"
 
 puts "reloading apache..."
-system "sudo /etc/init.d/apache2 reload"
+system "#{sudo} /etc/init.d/apache2 reload"
