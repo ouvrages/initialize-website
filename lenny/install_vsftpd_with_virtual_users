@@ -1,11 +1,18 @@
 #!/bin/bash
 
-sudo apt-get install vsftpd libpam-pwdfile
+if [ "$USER" == "root" ]; then
+  sudo=""
+else
+  sudo="sudo"
+fi
+  
 
-[ -e /etc/vsftpd.conf.orig ] || sudo cp /etc/vsftpd.conf{,.orig}
-[ -e /etc/pam.d/vsftpd.orig ] || sudo cp /etc/pam.d/vsftpd{,.orig}
+$sudo apt-get install vsftpd libpam-pwdfile
 
-cat <<EOF | sudo tee /etc/vsftpd.conf
+[ -e /etc/vsftpd.conf.orig ] || $sudo cp /etc/vsftpd.conf{,.orig}
+[ -e /etc/pam.d/vsftpd.orig ] || $sudo cp /etc/pam.d/vsftpd{,.orig}
+
+cat <<EOF | $sudo tee /etc/vsftpd.conf
 listen=YES
 anonymous_enable=NO
 local_enable=YES
@@ -21,12 +28,12 @@ user_config_dir=/etc/vsftpd.users
 local_umask=022
 EOF
 
-cat <<EOF | sudo tee /etc/pam.d/vsftpd
+cat <<EOF | $sudo tee /etc/pam.d/vsftpd
 auth    required pam_pwdfile.so pwdfile /etc/vsftpd.passwd
 account required pam_permit.so
 EOF
 
-sudo touch /etc/vsftpd.passwd
-sudo mkdir -p /etc/vsftpd.users
+$sudo touch /etc/vsftpd.passwd
+$sudo mkdir -p /etc/vsftpd.users
 
-sudo /etc/init.d/vsftpd restart
+$sudo /etc/init.d/vsftpd restart
