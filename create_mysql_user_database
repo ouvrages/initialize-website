@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'highline/import'
 require 'active_record'
+require 'logger'
 
 if ARGV.size != 2 and ARGV.size != 3
   raise "usage: #$0 <user> <password> [<dump file to load>]"
