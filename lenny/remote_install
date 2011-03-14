@@ -8,17 +8,14 @@ if [ -z "$host" ]; then
   exit 1
 fi
 
-[ -z "$repository" ] && repository="git@github.com:piglop/initialize-website.git"
+[ -z "$repository" ] && repository="git@github.com:ouvrages/initialize-website.git"
 
 set -x
 
 ../authorize_key root@$host
 ssh -t root@$host <<EOF
   apt-get update
-  apt-get install -y git-core
-EOF
-
-ssh -t root@$host <<EOF
+  apt-get install -y git-core </dev/null
   ssh-keyscan -H github.com >>~/.ssh/known_hosts
   git clone $repository
 EOF
