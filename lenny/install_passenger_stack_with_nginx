@@ -88,5 +88,15 @@ esac
 
 exit 0
 EOF
+$sudo chmod +x /etc/init.d/nginx
 
-update-rc.d nginx defaults
+$sudo update-rc.d nginx defaults
+
+$sudo cp $(dirname "$0")/nginx.conf /opt/nginx/conf
+$sudo mkdir /opt/nginx/conf/sites
+
+if pidof nginx; then
+  $sudo /etc/init.d/nginx restart
+else
+  $sudo /etc/init.d/nginx start
+fi
