@@ -88,5 +88,6 @@ esac
 
 exit 0
 EOF
+chmod +x /etc/init.d/nginx
 
 update-rc.d nginx defaults
