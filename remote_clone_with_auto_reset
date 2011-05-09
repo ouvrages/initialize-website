@@ -19,7 +19,8 @@ ssh -t $host <<EOF
   cat >$hook <<EOF2
 #!/bin/sh
 cd ..
-env -i git reset --hard
+unset GIT_DIR
+git reset --hard
 EOF2
   chmod +x $hook
 EOF
