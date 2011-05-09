@@ -6,6 +6,8 @@ else
   sudo="sudo"
 fi
 
+$sudo apt-get install -y build-essential zlib1g-dev libssl-dev libreadline5-dev </dev/null
+
 cd /tmp
 mkdir ree
 cd ree
@@ -18,3 +20,5 @@ url="http://rubyenterpriseedition.googlecode.com/files/$file"
 [ -d "$dir" ] || tar -xvzf "$file"
 cd "$dir"
 ./installer --auto /usr/local --no-dev-docs --dont-install-useful-gems
+
+[ -e ~/.gemrc ] || echo "gem: --bindir /usr/local/bin --no-ri --no-rdoc" >~/.gemrc
