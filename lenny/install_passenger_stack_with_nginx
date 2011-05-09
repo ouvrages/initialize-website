@@ -41,6 +41,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/nginx/sbi
 DAEMON=/opt/nginx/sbin/nginx
 NAME=nginx
 DESC=nginx
+PID=/var/run/nginx.pid
 
 test -x \$DAEMON || exit 0
 
@@ -54,28 +55,28 @@ set -e
 case "\$1" in
   start)
         echo -n "Starting \$DESC: "
-        start-stop-daemon --start --quiet --pidfile /opt/nginx/logs/nginx.pid \
+        start-stop-daemon --start --quiet --pidfile \$PID \
                 --exec \$DAEMON -- \$DAEMON_OPTS
         echo "\$NAME."
         ;;
   stop)
         echo -n "Stopping \$DESC: "
-        start-stop-daemon --stop --quiet --pidfile /opt/nginx/logs/nginx.pid \
+        start-stop-daemon --stop --quiet --pidfile \$PID \
                 --exec \$DAEMON
         echo "\$NAME."
         ;;
   restart|force-reload)
         echo -n "Restarting \$DESC: "
-        start-stop-daemon --stop --quiet --pidfile \
-                /opt/nginx/logs/nginx.pid --exec \$DAEMON
+        start-stop-daemon --stop --quiet --pidfile \$PID \
+                --exec \$DAEMON
         sleep 1
-        start-stop-daemon --start --quiet --pidfile \
-                /opt/nginx/logs/nginx.pid --exec \$DAEMON -- \$DAEMON_OPTS
+        start-stop-daemon --start --quiet --pidfile \$PID \
+                --exec \$DAEMON -- \$DAEMON_OPTS
         echo "\$NAME."
         ;;
   reload)
       echo -n "Reloading \$DESC configuration: "
-      start-stop-daemon --stop --signal HUP --quiet --pidfile /opt/nginx/logs/nginx.pid \
+      start-stop-daemon --stop --signal HUP --quiet --pidfile \$PID \
           --exec \$DAEMON
       echo "\$NAME."
       ;;
@@ -92,8 +93,15 @@ $sudo chmod +x /etc/init.d/nginx
 
 $sudo update-rc.d nginx defaults
 
-$sudo cp $(dirname "$0")/nginx.conf /opt/nginx/conf
-$sudo mkdir /opt/nginx/conf/sites
+$sudo ruby - /opt/nginx/conf/nginx.conf <<RUBY
+  string = "include sites/*.conf;"
+  data = File.read(ARGV.first)
+  data.sub! /\s{4}#\}\n\n\}\n\Z/, "    #}\n\n    #{string}\n}\n"
+  data.sub! "#pid        logs/nginx.pid;", "pid /var/run/nginx.pid;"
+  File.open(ARGV.first, 'w') { |f| f.write data }
+RUBY
+
+[ -d /opt/nginx/conf/sites ] || $sudo mkdir /opt/nginx/conf/sites
 
 if pidof nginx; then
   $sudo /etc/init.d/nginx restart
