@@ -1,0 +1,21 @@
+#!/bin/sh
+
+host="$1"
+
+if [ -z "$host" ]; then
+  echo "$0 <user@host>"
+  exit 1
+fi
+
+set -x
+
+ssh -t $host <<EOF
+cat >/etc/apache2/mods-available/deflate.conf <<CONFIG
+<IfModule mod_deflate.c>
+          AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript
+</IfModule>
+CONFIG
+a2enmod deflate
+/etc/init.d/apache2 restart
+EOF
+

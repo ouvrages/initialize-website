@@ -1,0 +1,6 @@
+#!/bin/sh
+
+apt-get install -y git-core </dev/null
+ssh-keyscan -H github.com >>~/.ssh/known_hosts
+git clone git@github.com:ouvrages/initialize-website.git
+
