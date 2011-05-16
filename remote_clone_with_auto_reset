@@ -11,9 +11,20 @@ fi
 
 hook=".git/hooks/post-receive"
 
+repo_host=`echo "$repository" |sed -e 's|.\+@\(.\+\):.\+|\1|'`
+key=`ssh-keyscan -H $repo_host`
+
+if [ -z "$key" ]; then
+  echo "could not get key"
+  exit 1
+fi
+
 ssh -t $host <<EOF
-  set -x
+  echo key...
+  grep '$key' .ssh/known_hosts >/dev/null || echo '$key' >.ssh/known_hosts
+  echo clone...
   git clone $repository $dir
+  echo create hook
   set -e
   cd $dir
   cat >$hook <<EOF2
@@ -24,4 +35,3 @@ git reset --hard
 EOF2
   chmod +x $hook
 EOF
-
