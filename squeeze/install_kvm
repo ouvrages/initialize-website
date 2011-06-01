@@ -1,0 +1,3 @@
+#!/bin/sh
+
+aptitude install -y qemu-kvm

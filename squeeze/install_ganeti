@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+
+def File.write(filename, content)
+  File.open(filename, 'w') { |f| f.write content }
+end
+
+hostname = %x(hostname).strip
+unless hostname =~ /\./
+  raise "Hostname #{hostname.inspect} is not fully qualified. Fix /etc/hostname and run /etc/init.d/hostname.sh"
+end
+
+hosts = File.read("/etc/hosts")
+if hosts =~ /([\d\.]+).*\s#{Regexp.escape hostname}(\s|\n)/
+  hosts_ip = $1
+  if hosts_ip == "127.0.1.1"
+    raise "Invalid IP associated to #{hostname.inspect} in /etc/hosts: #{hosts_ip.inspect}. Use real IP."
+  end
+else
+  raise "Hostname #{hostname.inspect} not found in /etc/hosts"
+end
+
+packages = %w(
+)
+
+system "apt-get", "install", "-y", *packages unless packages.empty?
+
+def update_config(filename, match, replacement)
+  config = File.read(filename)
+  if config.sub! match, replacement and $& != replacement
+    puts "Changing #{$&.inspect} to #{replacement.inspect} in #{filename.inspect}"
+    backup_filename = filename + ".before_ganeti_install"
+    unless File.exists? backup_filename
+      File.rename(filename, backup_filename)
+    end
+    File.write(filename, config)
+    true
+  else
+    false
+  end
+end
+
+update_config "/etc/lvm/lvm.conf", /filter = \[.+\]/, 'filter = [ "r|/dev/cdrom|", "r|/dev/drbd[0-9]+|" ]'
+
+puts "Installation done. Now initialize the cluster. See http://docs.ganeti.org/ganeti/current/html/install.html#initializing-the-cluster"
