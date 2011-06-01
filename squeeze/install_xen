@@ -1,0 +1,19 @@
+#!/bin/sh
+
+packages="
+linux-image-xen-amd64
+xen-utils-4.0
+xen-hypervisor-4.0-amd64
+xen-hypervisor
+xen-linux-system-2.6.32-5-xen-amd64
+xen-utils
+xen-tools
+"
+
+aptitude install -y $packages
+
+sed --in-place=.bak -e 's/GRUB_DEFAULT=0/GRUB_DEFAULT=1/' /etc/default/grub
+
+cd /etc/grub.d/
+[ -e 10_linux ] && mv 10_linux 50_linux
+update-grub2
