@@ -20,9 +20,19 @@ else
 end
 
 packages = %w(
+  automake
+  lvm2 ssh bridge-utils iproute iputils-arping
+  ndisc6 python python-pyopenssl openssl
+  python-pyparsing python-simplejson
+  python-pyinotify python-pycurl socat
+  paramiko
+  make
+  pandoc
+  graphviz
+  python-sphinx
 )
 
-system "apt-get", "install", "-y", *packages unless packages.empty?
+system "aptitude", "install", "-y", *packages unless packages.empty?
 
 def update_config(filename, match, replacement)
   config = File.read(filename)
@@ -40,5 +50,33 @@ def update_config(filename, match, replacement)
 end
 
 update_config "/etc/lvm/lvm.conf", /filter = \[.+\]/, 'filter = [ "r|/dev/cdrom|", "r|/dev/drbd[0-9]+|" ]'
+
+unless system <<-EOF
+  set -x
+  cd /root
+  git clone git://git.ganeti.org/ganeti.git --branch stable-2.4
+  cd ganeti
+  set -e
+  ./autogen.sh
+  ./configure --localstatedir=/var --sysconfdir=/etc
+  make
+  make install
+  cp doc/examples/ganeti.initd /etc/init.d/ganeti
+  update-rc.d ganeti defaults 20 80
+  cp doc/examples/ganeti.cron /etc/cron.d/ganeti
+EOF
+  raise "ganeti build failed"
+end
+
+%w(
+/etc/ganeti
+/var/lib/ganeti
+/var/log/ganeti
+/srv/ganeti
+/srv/ganeti/os
+/srv/ganeti/export
+).each do |dir|
+  Dir.mkdir dir unless File.exists?(dir)
+end
 
 puts "Installation done. Now initialize the cluster. See http://docs.ganeti.org/ganeti/current/html/install.html#initializing-the-cluster"
