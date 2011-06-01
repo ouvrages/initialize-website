@@ -30,6 +30,7 @@ packages = %w(
   pandoc
   graphviz
   python-sphinx
+  debootstrap dump kpartx
 )
 
 system "aptitude", "install", "-y", *packages unless packages.empty?
@@ -79,4 +80,23 @@ end
   Dir.mkdir dir unless File.exists?(dir)
 end
 
+unless system <<-EOF
+  set -x
+  cd /root
+  git clone git://git.ganeti.org/instance-debootstrap.git
+  cd instance-debootstrap
+  set -e
+  ./autogen.sh
+  ./configure
+  make
+  make install
+EOF
+  raise "ganeti build failed"
+end
+
+
+
 puts "Installation done. Now initialize the cluster. See http://docs.ganeti.org/ganeti/current/html/install.html#initializing-the-cluster"
+puts
+puts "For example:"
+puts "gnt-cluster init --enabled-hypervisors=kvm --no-etc-hosts --drbd-usermode-helper=/sbin/drbdadm --master-netdev=vpn --nic-parameters=\"link=vpn\" cluster.lepton"
