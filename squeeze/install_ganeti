@@ -84,7 +84,7 @@ end
 unless system <<-EOF
   set -x
   cd /root
-  git clone git://git.ganeti.org/instance-debootstrap.git
+  git clone git@github.com:ouvrages/ganeti-instance-debootstrap.git instance-debootstrap
   cd instance-debootstrap
   set -e
   ./autogen.sh
