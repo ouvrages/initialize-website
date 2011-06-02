@@ -63,6 +63,7 @@ unless system <<-EOF
   make
   make install
   cp doc/examples/ganeti.initd /etc/init.d/ganeti
+  chmod +x /etc/init.d/ganeti
   update-rc.d ganeti defaults 20 80
   cp doc/examples/ganeti.cron /etc/cron.d/ganeti
 EOF
@@ -87,7 +88,7 @@ unless system <<-EOF
   cd instance-debootstrap
   set -e
   ./autogen.sh
-  ./configure
+  ./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc --with-os-dir=/srv/ganeti/os
   make
   make install
 EOF
@@ -99,4 +100,4 @@ end
 puts "Installation done. Now initialize the cluster. See http://docs.ganeti.org/ganeti/current/html/install.html#initializing-the-cluster"
 puts
 puts "For example:"
-puts "gnt-cluster init --enabled-hypervisors=kvm --no-etc-hosts --drbd-usermode-helper=/sbin/drbdadm --master-netdev=vpn --nic-parameters=\"link=vpn\" cluster.lepton"
+puts "gnt-cluster init --enabled-hypervisors=kvm -H \"kvm:kernel_path=\" --no-etc-hosts --drbd-usermode-helper=/sbin/drbdadm --master-netdev=vpn --nic-parameters=\"link=vpn\" cluster.lepton"
