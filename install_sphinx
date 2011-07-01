@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+if [ "$USER" = "root" ]; then
+  sudo=""
+else
+  sudo="sudo"
+fi
+
+mkdir -p /tmp/sphinx_install
+cd /tmp/sphinx_install
+[ -e sphinx-0.9.9.tar.gz ] || wget http://sphinxsearch.com/files/sphinx-0.9.9.tar.gz
+
+[ -e sphinx-0.9.9 ] || tar -xf sphinx-0.9.9.tar.gz
+cd sphinx-0.9.9
+
+./configure
+make
+$sudo make install
