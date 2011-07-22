@@ -1,0 +1,19 @@
+#!/bin/bash
+
+[ -z "$1" ] && {
+  echo "usage: $0 <timezone>"
+  echo "Available time zones:"
+  echo "  find /usr/share/zoneinfo -type f | less"
+  exit 1
+}
+
+[ -e /usr/share/zoneinfo/$1 ] || {
+  echo "/usr/share/zoneinfo/$1 not found"
+  exit 1
+}
+
+echo "$1" >/etc/timezone
+cp /usr/share/zoneinfo/$1 /etc/localtime
+for i in bind9 cron fetchmail inetd mailman sendmail sysklogd nginx; do
+  [ -x /etc/init.d/$i ] && /etc/init.d/$i restart
+done
