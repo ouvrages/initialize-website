@@ -1,5 +1,7 @@
 #!/bin/sh
 
-$sudo apt-get install -y rubygems
+apt-get install -y rubygems
 
 [ -e ~/.gemrc ] || echo "gem: --bindir /usr/local/bin --no-ri --no-rdoc" >~/.gemrc
+
+which ruby || ln -s ruby1.8 /usr/bin/ruby

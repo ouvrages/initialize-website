@@ -2,4 +2,7 @@ A set of scripts to configure servers.
 
 
 To install on a fresh lenny install:
-  wget --no-check-certificate https://github.com/ouvrages/initialize-website/raw/master/lenny/install -O - | sh
+  wget --no-check-certificate https://github.com/ouvrages/initialize-website/raw/master/lenny/install -O - | bash
+
+On squeeze:
+  wget --no-check-certificate https://github.com/ouvrages/initialize-website/raw/master/squeeze/install -O - | bash

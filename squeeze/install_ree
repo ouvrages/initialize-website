@@ -1,0 +1,24 @@
+#!/bin/sh
+
+if [ "$USER" = "root" ]; then
+  sudo=""
+else
+  sudo="sudo"
+fi
+
+$sudo apt-get install -y build-essential zlib1g-dev libssl-dev libreadline5-dev </dev/null
+
+cd /tmp
+mkdir ree
+cd ree
+
+dir="ruby-enterprise-1.8.7-2011.03"
+file="$dir.tar.gz"
+url="http://rubyenterpriseedition.googlecode.com/files/$file"
+
+[ -e "$file" ] || wget "$url"
+[ -d "$dir" ] || tar -xvzf "$file"
+cd "$dir"
+./installer --auto /usr/local --no-dev-docs --dont-install-useful-gems
+
+[ -e ~/.gemrc ] || echo "gem: --bindir /usr/local/bin --no-ri --no-rdoc" >~/.gemrc
