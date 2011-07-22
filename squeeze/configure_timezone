@@ -17,3 +17,5 @@ cp /usr/share/zoneinfo/$1 /etc/localtime
 for i in bind9 cron fetchmail inetd mailman sendmail sysklogd nginx; do
   [ -x /etc/init.d/$i ] && /etc/init.d/$i restart
 done
+
+exit 0
