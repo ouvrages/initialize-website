@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
-require 'highline/import'
 
 if ARGV.size != 2 and ARGV.size != 3
   raise "usage: #$0 <user> <password> [<dump file to load>]"
@@ -10,8 +9,12 @@ end
 user, password, dump_file = ARGV
 database = user
 
-root_password = ask("Mysql root password: ") { |q| q.echo = false }
-
+if ENV["MYSQL_PASSWORD"]
+  root_password = ENV["MYSQL_PASSWORD"]
+else
+  require 'highline/import'
+  root_password = ask("Mysql root password: ") { |q| q.echo = false }
+end
 
 IO.popen("mysql -u root --password=\"#{root_password}\"", "w") do |f|
   f.puts "CREATE DATABASE `#{database}` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_general_ci`;"
