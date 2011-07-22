@@ -6,12 +6,14 @@ else
   sudo="sudo"
 fi
 
+[ "$1" == "--reinstall" ] && reinstall=yes
+
 $sudo apt-get remove -y nginx
 $sudo apt-get install -y libcurl4-openssl-dev
 
 which passenger-install-nginx-module >/dev/null || $sudo gem install passenger
 
-if [ ! -e /opt/nginx/conf/nginx.conf ]; then
+if [ ! -e /opt/nginx/conf/nginx.conf -o "$reinstall" = "yes" ]; then
   $sudo passenger-install-nginx-module --auto --auto-download --prefix=/opt/nginx
 fi
 
