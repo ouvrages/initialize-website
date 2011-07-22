@@ -2,8 +2,6 @@
 
 require 'rubygems'
 require 'highline/import'
-require 'active_record'
-require 'logger'
 
 if ARGV.size != 2 and ARGV.size != 3
   raise "usage: #$0 <user> <password> [<dump file to load>]"
@@ -14,31 +12,11 @@ database = user
 
 root_password = ask("Mysql root password: ") { |q| q.echo = false }
 
-ActiveRecord::Base.logger = Logger.new(STDOUT)
 
-ActiveRecord::Base.establish_connection(
-  'adapter' => 'mysql',
-  'host' => 'localhost',
-  'database' => nil,
-  'username' => 'root',
-  'password' => root_password
-)
-
-charset = ENV['CHARSET'] || 'utf8'
-collation = ENV['COLLATION'] || 'utf8_general_ci'
-creation_options = {
-  :charset => charset,
-  :collation => collation,
-}
-
-grant_statement = "GRANT ALL PRIVILEGES ON
-  #{database}.* " \
-  "TO '#{user}'@'localhost' " \
-  "IDENTIFIED BY '#{password}' WITH GRANT OPTION;"
-
-
-ActiveRecord::Base.connection.create_database(database, creation_options)
-ActiveRecord::Base.connection.execute grant_statement
+IO.popen("mysql -u root --password=\"#{root_password}\"", "w") do |f|
+  f.puts "CREATE DATABASE `#{database}` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_general_ci`;"
+  f.puts "GRANT ALL PRIVILEGES ON #{database}.* TO '#{user}'@'localhost' IDENTIFIED BY '#{password}' WITH GRANT OPTION;"
+end
 
 if dump_file
   command = "mysql -u #{user} --password=\"#{password}\" #{user} <#{dump_file}"
