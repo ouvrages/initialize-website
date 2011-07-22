@@ -96,7 +96,10 @@ $sudo chmod +x /etc/init.d/nginx
 $sudo update-rc.d nginx defaults
 
 $sudo ruby - /opt/nginx/conf/nginx.conf <<RUBY
-  lines = ["server_names_hash_bucket_size: 64;", "include sites/*.conf;"].map { |line| " " * 4 + line + "\n" }.join
+  lines = [
+    "server_names_hash_bucket_size 64;",
+    "include sites/*.conf;"
+  ].map { |line| " " * 4 + line + "\n" }.join
   data = File.read(ARGV.first)
   data.sub! /\s{4}#\}\n\n\}\n\Z/, "    #}\n\n#{lines}}\n"
   data.sub! "#pid        logs/nginx.pid;", "pid /var/run/nginx.pid;"
