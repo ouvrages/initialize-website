@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ "$USER" = "root" ]; then
+  sudo=""
+else
+  sudo="sudo"
+fi
+
+$sudo apt-get install -y postgresql-8.4 libpq-dev
+
