@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+if ARGV.size != 1
+  puts "usage: #$0 <max pool size>"
+  exit 1
+end
+
+file = "/opt/nginx/conf/nginx.conf"
+pool_size = ARGV.first
+
+data = File.read(file)
+unless data.sub! /passenger_max_pool_size\s+\d+\s*;/, "passenger_max_pool_size #{pool_size};"
+  unless data.sub! /(http\s*\{.+)(\})/m, "\\1    passenger_max_pool_size #{pool_size};\n\\2"
+    raise "http section not found"
+  end
+end
+
+File.open(file, 'w') { |f| f.write data }
+
+system "/etc/init.d/nginx restart"
