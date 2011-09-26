@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-/etc/init.d/sendmail stop
+[ -x /etc/init.d/sendmail ] && /etc/init.d/sendmail stop
 
 apt-get remove -y sendmail sendmail-base sendmail-bin sendmail-cf sendmail-doc
 
