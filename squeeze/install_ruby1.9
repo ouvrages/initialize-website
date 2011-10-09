@@ -11,4 +11,6 @@ cd ruby-1.9.2-p290
 
 cd ext/zlib && ruby extconf.rb && make && make install
 
+gem update --system
+
 [ -e ~/.gemrc ] || echo "gem: --bindir /usr/local/bin --no-ri --no-rdoc" >~/.gemrc
