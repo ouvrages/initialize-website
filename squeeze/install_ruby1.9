@@ -1,0 +1,12 @@
+#!/bin/sh
+
+aptitude install -y build-essential
+
+cd $HOME
+wget -c http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p290.tar.gz
+
+[ -e ruby-1.9.2-p290 ] || tar -xvzf ruby-1.9.2-p290.tar.gz
+cd ruby-1.9.2-p290
+./configure && make && make install
+
+[ -e ~/.gemrc ] || echo "gem: --bindir /usr/local/bin --no-ri --no-rdoc" >~/.gemrc
