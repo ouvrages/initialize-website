@@ -9,4 +9,6 @@ wget -c http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p290.tar.gz
 cd ruby-1.9.2-p290
 ./configure && make && make install
 
+cd ext/zlib && ruby extconf.rb && make && make install
+
 [ -e ~/.gemrc ] || echo "gem: --bindir /usr/local/bin --no-ri --no-rdoc" >~/.gemrc
