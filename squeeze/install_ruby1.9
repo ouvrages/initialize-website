@@ -1,12 +1,14 @@
 #!/bin/sh
 
-aptitude install -y build-essential libssl-dev ibssl-dev libreadline5-dev zlib1g-dev
+aptitude install -y build-essential libssl-dev ibssl-dev libreadline5-dev zlib1g-dev libyaml-dev
+
+VERSION=ruby-1.9.3-p0
 
 cd $HOME
-wget -c http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p290.tar.gz
+wget -c http://ftp.ruby-lang.org/pub/ruby/1.9/$VERSION.tar.gz
 
-[ -e ruby-1.9.2-p290 ] || tar -xvzf ruby-1.9.2-p290.tar.gz
-cd ruby-1.9.2-p290
+[ -e $VERSION ] || tar -xvzf $VERSION.tar.gz
+cd $VERSION
 ./configure && make && make install
 
 cd ext/zlib
