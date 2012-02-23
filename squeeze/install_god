@@ -4,7 +4,7 @@ set -xe
 
 gem install god
 
-wget https://raw.github.com/mojombo/god/master/init/lsb_compliant_god \
+wget https://raw.github.com/ouvrages/god/master/init/lsb_compliant_god \
   -O /etc/init.d/god
 
 chmod +x /etc/init.d/god
