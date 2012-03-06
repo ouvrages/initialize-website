@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ "$USER" = "root" ]; then
+  sudo=""
+else
+  sudo="sudo"
+fi
+
+$sudo apt-get install -y mysql-server libmysqlclient15-dev
+$sudo gem install mysql mysql2
+

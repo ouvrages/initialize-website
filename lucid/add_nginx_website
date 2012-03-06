@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+if ARGV.size < 2
+  raise "usage: #$0 <document root> <hostname> [<aliases...>]"
+end
+
+root, *hostnames = ARGV
+
+if ENV["USER"] == "root"
+  sudo = ""
+else
+  sudo = "sudo"
+end
+
+config = "
+server {
+  listen 80;
+  server_name #{hostnames.join(' ')};
+  root #{root};
+}
+"
+
+config_file = "/opt/nginx/conf/sites/#{hostnames.first}.conf"
+
+puts "writing configuration to #{config_file}"
+system "#{sudo} tee #{config_file} <<EOF
+#{config}
+EOF
+"
+
+puts "reloading nginx..."
+system "#{sudo} /etc/init.d/nginx reload"

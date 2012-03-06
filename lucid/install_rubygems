@@ -1,0 +1,27 @@
+#!/bin/sh
+
+if [ "$USER" = "root" ]; then
+  sudo=""
+else
+  sudo="sudo"
+fi
+
+$sudo apt-get remove -y rubygems
+$sudo apt-get install -y ruby ruby-dev
+
+archive=rubygems-1.5.3.tgz
+dir=`basename $archive .tgz`
+
+TMP=${TMP:-/tmp}
+cd $TMP
+wget http://production.cf.rubygems.org/rubygems/$archive || exit 1
+
+tar -xf $archive
+cd $dir
+$sudo ruby setup.rb
+cd ..
+rm -r $archive $dir
+
+$sudo ln -s gem1.8 /usr/bin/gem
+
+[ -e ~/.gemrc ] || echo "gem: --bindir /usr/local/bin --no-ri --no-rdoc" >~/.gemrc
