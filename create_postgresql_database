@@ -1,0 +1,16 @@
+#!/bin/bash
+
+username=$1
+database=$3
+[ -z "$database" ] && database=$username
+
+if [ -z "$username" -o -z "$database" ]; then
+  echo "usage: $0 <username> [<database name>]"
+  exit 1
+fi
+
+su - postgres <<EOF
+set -e
+createuser --echo --no-createdb --no-createrole --no-superuser --pwprompt "$username"
+createdb --echo --encoding=UTF8 --owner="$username" "$database"
+EOF
