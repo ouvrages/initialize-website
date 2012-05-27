@@ -1,0 +1,12 @@
+#!/bin/sh
+
+wget -O /etc/munin/plugins/gateway_ping \
+  https://raw.github.com/ouvrages/gateway-ping-munin-plugin/master/gateway_ping
+chmod +x /etc/munin/plugins/gateway_ping
+
+cat <<EOF >/etc/munin/plugin-conf.d/gateway_ping
+[gateway_ping]
+user nobody
+EOF
+
+/etc/init.d/munin-node restart
