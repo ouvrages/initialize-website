@@ -55,7 +55,7 @@ update_config "/etc/lvm/lvm.conf", /filter = \[.+\]/, 'filter = [ "r|/dev/cdrom|
 unless system <<-EOF
   set -x
   cd /root
-  git clone git://git.ganeti.org/ganeti.git --branch stable-2.5
+  git clone git://git.ganeti.org/ganeti.git --branch stable-2.4
   cd ganeti
   set -e
   ./autogen.sh
