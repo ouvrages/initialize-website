@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Source: http://signalboxes.net/mac2linux/replace-mac-os-x-file-servers-with-linux/
+
+apt-get install -y \
+  libavahi-client-dev libldap2-dev libacl1-dev checkinstall build-essential \
+  libcrack2-dev libwrap0-dev libdb-dev libkrb5-dev
+
+VERSION=2.2.3
+NAME=netatalk-$VERSION
+FILE=$NAME.tar.bz2
+
+cd $HOME
+[ -e $NAME ] || wget -c wget http://downloads.sourceforge.net/project/netatalk/netatalk/$VERSION/$FILE
+
+[ -e $NAME ] || tar -xvf $FILE
+cd $NAME
+./configure --prefix=/usr --includedir="/usr/local/include" --mandir="\${prefix}/share/man" \
+  --infodir="\${prefix}/share/info" --sysconfdir=/etc --localstatedir=/var \
+  --libexecdir="\${prefix}/lib/netatalk" --srcdir=. --disable-maintainer-mode \
+  --disable-dependency-tracking --disable-silent-rules --with-shadow --enable-fhs \
+  --enable-tcp-wrappers --with-cnid-cdb-backend --with-pkgconfdir=/etc/netatalk \
+  --enable-krb4-uam --enable-krbV-uam --with-cnid-dbd-txn --with-libgcrypt-dir \
+  --with-cracklib=/var/cache/cracklib/cracklib_dict --disable-srvloc --enable-zeroconf \
+  --enable-debian --with-acls --with-ldap --enable-zeroconf \
+  || exit 1
+
+# bug with ranlib and checkinstall (see http://informatiolibertas.wordpress.com/2012/07/10/ranlib-issue-while-using-checkinstall/ )
+mkdir /usr/lib/netatalk
+
+checkinstall -y
