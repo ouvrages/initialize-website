@@ -15,14 +15,4 @@ cd $HOME
 
 [ -e $NAME ] || tar -xvf $FILE
 cd $NAME
-./configure --prefix=/usr --includedir="/usr/local/include" --mandir="\${prefix}/share/man" \
-  --infodir="\${prefix}/share/info" --sysconfdir=/etc --localstatedir=/var \
-  --libexecdir="\${prefix}/lib/netatalk" --srcdir=. \
-  --enable-debian --enable-zeroconf --enable-debug \
-  || exit 1
-
-# bug with ranlib and checkinstall (see http://informatiolibertas.wordpress.com/2012/07/10/ranlib-issue-while-using-checkinstall/ )
-mkdir /usr/lib/netatalk
-mkdir /etc/netatalk/uams
-
-checkinstall -y
+./configure --enable-debian --enable-zeroconf && make && make install
