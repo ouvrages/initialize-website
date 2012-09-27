@@ -4,7 +4,8 @@
 
 apt-get install -y \
   libavahi-client-dev libldap2-dev libacl1-dev checkinstall build-essential \
-  libcrack2-dev libwrap0-dev libdb-dev libkrb5-dev libgcrypt11-dev
+  libcrack2-dev libwrap0-dev libdb-dev libkrb5-dev libgcrypt11-dev \
+  libpam0g-dev
 
 VERSION=2.2.3
 NAME=netatalk-$VERSION
@@ -18,6 +19,7 @@ cd $NAME
 ./configure \
   --sysconfdir=/etc --with-shadow \
   --enable-krb4-uam --enable-krbV-uam \
+  --with-pam \
   --with-cracklib=/var/cache/cracklib/cracklib_dict \
   --enable-debian --enable-zeroconf \
   && make && make install
