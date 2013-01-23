@@ -1,0 +1,173 @@
+#!/bin/bash
+
+# TODO : create swap device
+# TODO : configure vm config (rewrite disks, vif, ...)
+# TODO : configure host (console, fstab, network?, ...)
+# TODO : copy config to remote host
+
+function log {
+  echo "$@"
+  if [ ! -z "$log_file" ]; then
+    echo $(date '+%Y-%m-%d %H:%M:%S') "$@" >>$log_file
+  fi
+}
+
+function info {
+  log "info  -- " "$@"
+}
+
+function error {
+  log "error -- " "$@"
+}
+
+while getopts ":n:s:m:M:S:r:i:I:p:d:wv:" optname; do
+  case "$optname" in
+    "n") name="$OPTARG";;
+    "s") size="$OPTARG";;
+    "m") memory="$OPTARG";;
+    "M") mac="$OPTARG";;
+    "S") swap="$OPTARG";;
+    "r") remote="$OPTARG";;
+    "i") ip="$OPTARG";;
+    "I") remote_ip="$OPTARG";;
+    "p") port="$OPTARG";;
+    "d") drbd="$OPTARG";;
+    "v") vg="$OPTARG";;
+    "w") write=yes;;
+    "?")
+      error "Unknown option $OPTARG"
+      exit 1
+      ;;
+    ":")
+      error "No argument value for option $OPTARG"
+      exit 1
+      ;;
+    *)
+      # Should not occur
+      error "Unknown error while processing options"
+      exit 1
+      ;;
+  esac
+done
+
+for i in "$name" "$size" "$memory" "$swap" "$remote" "$ip" "$remote_ip"; do
+  if [ -z "$i" ]; then
+    error "usage: $0 <options>"
+    error "  -n <name>"
+    error "  -s <size>[MG]"
+    error "  -m <memory>[MG]"
+    error "  -S <swap size>[MG]"
+    error "  -r <remote hostname>"
+    error "  -i <local ip>"
+    error "  -I <remote ip>"
+    error " [-M <mac address>]"
+    error " [-p <drbd port>]"
+    error " [-d <drbd device num>]"
+    error " [-v <LVM volume group>]"
+    error " [-w] (write, do vm creation)"
+    exit 1
+  fi
+done
+
+mkdir -p /var/log/create_vm
+log_file="/var/log/create_vm/$name.log"
+
+info "command line: " "$0" "$@"
+
+if [ -z "$mac" ]; then
+  mac=$(echo "$name" | sha1sum | sed -e "s/^\(..\)\(..\)\(..\).\+/00:16:3e:\1:\2:\3/")
+  info "generated MAC: $mac"
+fi
+
+mkdir -p /etc/drbd.d
+if [ ! -e /etc/drbd.d/00_original ]; then
+  info "moving /etc/drbd.conf to /etc/drbd.d/00_original"
+  mv /etc/drbd.conf /etc/drbd.d/00_original
+fi
+
+if [ -z "$drbd" ]; then
+  for i in $(seq 0 255); do
+    grep "/dev/drbd$i" /etc/drbd.d/* >/dev/null && continue
+    drbd=$i
+    break
+  done
+  info "generated drbd device number: $drbd"
+fi
+
+if [ -z "$port"]; then
+  port=$[ 7789 + $drbd ]
+  info "generated port: $port"
+fi
+
+if [ -z "$vg" ]; then
+  vg=vg
+  info "generated vg: $vg"
+fi
+
+hostname=$(</etc/hostname)
+info "local hostname is $hostname"
+
+if [ "$write" == "yes" ]; then
+  function write_file {
+    file="$1"
+    content="$2"
+    info "writing $file with:"$'\n' "$content"
+    echo "$content" >$file || exit 1
+  }
+  
+  function run {
+    info "running: " "$@"
+    eval "$@" 2>&1 | tee --append $log_file || exit 1
+  }
+else
+  info "-w not given, dry run"
+  function write_file {
+    file="$1"
+    content="$2"
+    info "would write $file with:"$'\n' "$content"
+  }
+  
+  function run {
+    info "would run: " "$@"
+  }
+fi
+
+drbd_config="/etc/drbd.d/$(printf "%02d" $drbd)_$name"
+info "drbd config is $drbd_config"
+
+drbd_config_content="
+resource $name {
+  on $hostname {
+    device    /dev/drbd$drbd;
+    disk      /dev/vg/$name;
+    meta-disk internal;
+    address   $ip:$port;
+  }
+  on $remote {
+    device    /dev/drbd$drbd;
+    disk      /dev/vg/$name;
+    meta-disk internal;
+    address   $remote_ip:$port;
+  }
+}  
+"
+
+run lvcreate --name "$name" --size "$size" "$vg"
+
+write_file $drbd_config "$drbd_config_content"
+run "cat /etc/drbd.d/* >/etc/drbd.conf"
+run drbdadm create-md $name
+run drbdadm up $name
+
+run xen-create-image \
+  --hostname="$name" \
+  --dist=lenny \
+  --memory="$memory" \
+  --dhcp \
+  --fs=ext3 \
+  --image-dev=/dev/drbd$drbd \
+  --swap=512M \
+  --ide \
+  --mac="$mac"
+
+run xm create $name.cfg

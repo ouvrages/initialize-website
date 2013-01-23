@@ -34,4 +34,5 @@ unset GIT_DIR
 git reset --hard
 EOF2
   chmod +x $hook
+  git config receive.denyCurrentBranch ignore
 EOF

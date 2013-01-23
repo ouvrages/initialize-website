@@ -1,0 +1,37 @@
+#!/bin/sh
+
+apt-get install grub
+
+cat <<EOF
+Warning: If the install hangs, it may because your root fs is ext4.
+To solve this boot in rescue mode (using the manager) and
+  mkdir /mnt/root /mnt/home
+  mount /dev/sda1 /mnt/root
+  mount /dev/sda2 /mnt/home
+  mkdir /mnt/home/system
+  cp -a /mnt/root/* /mnt/home/system
+  umount /mnt/root
+  mkfs.ext3 /dev/sda1
+  mount /dev/sda1 /mnt/root
+  cp -a /mnt/home/system/* /mnt/root/
+  mount /proc /mnt/root/proc -o bind
+  chroot /mnt/root
+  dumpe2fs /dev/sda1 |grep -i uuid
+  edit /boot/grub/menu.lst and update the uuid
+  restart initialize-website/lenny/kimsufi/install_grub
+  exit
+  umount everything
+  update the manager to boot on hd
+  reboot
+EOF
+
+grub-install --recheck /dev/sda
+
+grub --batch <<EOF
+root (hd0,0)
+find /boot/grub/stage2
+setup (hd0)
+quit
+EOF
+
+echo "GRUB installed. Install a kernel (OVH base kernel is not detected)."

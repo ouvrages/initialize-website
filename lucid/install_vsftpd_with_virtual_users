@@ -26,7 +26,6 @@ chroot_local_user=YES
 hide_ids=YES
 user_config_dir=/etc/vsftpd.users
 local_umask=022
-dual_log_enable=YES
 EOF
 
 cat <<EOF | $sudo tee /etc/pam.d/vsftpd

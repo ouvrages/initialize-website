@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -xe
+
+gem install god
+
+wget https://raw.github.com/ouvrages/god/master/init/lsb_compliant_god \
+  -O /etc/init.d/god
+
+chmod +x /etc/init.d/god
+
+sed -ie 's|DAEMON="/usr/bin/#{NAME}"|DAEMON="/usr/local/bin/#{NAME}"|' \
+  /etc/init.d/god
+
+mkdir -p /etc/god
+[ -e /etc/god/god.conf ] || {
+  cat >/etc/god/god.conf <<EOF
+#God.watch do |w|
+#  w.name = "simple"
+#  w.start = "ruby /full/path/to/simple.rb"
+#  w.keepalive
+#end
+EOF
+}

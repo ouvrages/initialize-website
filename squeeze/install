@@ -5,6 +5,6 @@ set -e
 apt-get install -y git-core </dev/null
 key=`ssh-keyscan github.com`
 { [ -e ~/.ssh/known_hosts ] && grep "$key" ~/.ssh/known_hosts >/dev/null; } || echo "$key" >>~/.ssh/known_hosts
-[ -e initialize-website ] || git clone git@github.com:ouvrages/initialize-website.git
+[ -e initialize-website ] || git clone git://github.com/ouvrages/initialize-website.git
 cd initialize-website
 git pull

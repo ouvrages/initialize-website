@@ -1,0 +1,123 @@
+#!/usr/bin/env ruby
+
+def File.write(filename, content)
+  File.open(filename, 'w') { |f| f.write content }
+end
+
+hostname = %x(hostname).strip
+unless hostname =~ /\./
+  raise "Hostname #{hostname.inspect} is not fully qualified. Fix /etc/hostname and run /etc/init.d/hostname.sh"
+end
+
+hosts = File.read("/etc/hosts")
+if hosts =~ /([\d\.]+).*\s#{Regexp.escape hostname}(\s|\n)/
+  hosts_ip = $1
+  if hosts_ip == "127.0.1.1"
+    raise "Invalid IP associated to #{hostname.inspect} in /etc/hosts: #{hosts_ip.inspect}. Use real IP."
+  end
+else
+  raise "Hostname #{hostname.inspect} not found in /etc/hosts"
+end
+
+unless system("xm list >/dev/null")
+  raise "Xen is not installed."
+end
+
+sources = File.read('/etc/apt/sources.list')
+unless sources =~ /lenny-backports/
+  sources << "\n"
+  sources << "deb http://backports.debian.org/debian-backports lenny-backports main"
+  sources << "\n"
+  File.open('/etc/apt/sources.list', 'w') { |f| f.write sources }
+  system "apt-get update"
+end
+
+packages = %w(
+  lvm2 ssh bridge-utils iproute iputils-arping
+  python python-pyopenssl openssl python-pyparsing
+  python-simplejson python-pyinotify socat
+  ganeti2 debootstrap dump kpartx
+)
+
+system "apt-get", "install", "-y", *packages
+
+def update_config(filename, match, replacement)
+  config = File.read(filename)
+  if config.sub! match, replacement and $& != replacement
+    puts "Changing #{$&.inspect} to #{replacement.inspect} in #{filename.inspect}"
+    backup_filename = filename + ".before_ganeti_install"
+    unless File.exists? backup_filename
+      File.rename(filename, backup_filename)
+    end
+    File.write(filename, config)
+    true
+  else
+    false
+  end
+end
+
+update_config "/etc/xen/xend-config.sxp", /\(dom0-min-mem \d+\)/, "(dom0-min-mem 0)"
+if update_config "/etc/default/xendomains", /XENDOMAINS_SAVE=.+$/, 'XENDOMAINS_SAVE=""'
+  system "/etc/init.d/xend restart"
+end
+
+grub_updated = false
+grub_updated = true if update_config "/boot/grub/menu.lst", /# xenhopt=.*$/, '# xenhopt=dom0_mem=512M'
+#grub_updated = true if update_config "/boot/grub/menu.lst", /# xenkopt=.*$/, '# xenkopt=console=tty0 nosmp'
+if grub_updated
+  system "update-grub" if grub_updated
+  raise "Grub config updated. You must reboot and restart this script."
+end
+
+kernel = %x(uname -r).strip
+puts "Kernel is #{kernel.inspect}"
+raise "Kernel doesn't contain xen" unless kernel =~ /-xen-/
+
+%w( vmlinuz initrd.img ).each do |prefix|
+  old, new = "#{prefix}-#{kernel}", "/boot/#{prefix}-2.6-xenU"
+  begin
+    File.symlink(old, new) 
+    puts "Symlinked #{new.inspect} to #{old.inspect}"
+  rescue Errno::EEXIST
+  end
+end
+
+drbd = File.read('/etc/drbd.conf')
+if drbd.gsub! /^resource /, "skip resource "
+  puts "disabling resources in /etc/drbd.conf"
+  File.write("/etc/drbd.conf", drbd)
+end
+
+if false
+interfaces = File.read("/etc/network/interfaces")
+unless interfaces =~ /xen-br0/
+  interfaces << "
+
+# install-ganeti notes:
+# disable your normal network device, configure the following one and remove these comments
+
+auto xen-br0
+iface xen-br0 inet static
+   address YOUR_IP_ADDRESS
+   netmask YOUR_NETMASK
+   network YOUR_NETWORK
+   broadcast YOUR_BROADCAST_ADDRESS
+   gateway YOUR_GATEWAY
+   bridge_ports eth0
+   bridge_stp off
+   bridge_fd 0
+"
+  File.write "/etc/network/interfaces", interfaces
+  raise "You must edit your network config in /etc/network/interfaces (comments have been added to it) and restart this script"
+end
+end
+
+unless system "vgs xenvg"
+  raise "Need xenvg vgs"
+end
+
+update_config "/etc/lvm/lvm.conf", /filter = \[.+\]/, 'filter = [ "r|/dev/cdrom|", "r|/dev/drbd[0-9]+|" ]'
+
+puts "Installation done. Now initialize the cluster. See http://docs.ganeti.org/ganeti/current/html/install.html#initializing-the-cluster"
+
+puts "For example: gnt-cluster init --nic-parameters link=#{bridge} --master-netdev #{bridge} --no-etc-hosts <cluster hostname>"

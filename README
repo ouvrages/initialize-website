@@ -6,3 +6,6 @@ To install on a fresh lenny install:
 
 On squeeze:
   wget --no-check-certificate https://github.com/ouvrages/initialize-website/raw/master/squeeze/install -O - | bash
+
+On lucid:
+  wget https://github.com/ouvrages/initialize-website/raw/master/lucid/install -O - | bash

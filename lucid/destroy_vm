@@ -1,0 +1,22 @@
+#!/bin/bash
+
+name="$1"
+
+if [ -z "$name" ]; then
+  echo "usage: $0 <name>"
+fi
+
+set -x
+
+xm destroy $name
+rm /etc/xen/$name.cfg
+
+for i in $name ${name}_swap; do
+  drbdadm down $i
+  echo yes | drbdadm wipe-md $i
+  for j in $(grep -l "resource $i {" /etc/drbd.d/*); do
+    rm $j
+  done
+  lvremove -f /dev/vg/$i
+done
+cat /etc/drbd.d/* >/etc/drbd.conf

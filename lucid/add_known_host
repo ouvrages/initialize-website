@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "usage: $0 <hostname>"
+  exit 1
+fi
+
+file="/etc/ssh/ssh_known_hosts"
+
+line=$(ssh-keyscan -H $1)
+grep "$line" "$file" || echo "$line" >>"$file"

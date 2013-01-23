@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# Source: http://signalboxes.net/mac2linux/replace-mac-os-x-file-servers-with-linux/
+
+apt-get install -y \
+  libavahi-client-dev libldap2-dev libacl1-dev checkinstall build-essential \
+  libcrack2-dev libwrap0-dev libdb-dev libkrb5-dev libgcrypt11-dev \
+  libpam0g-dev avahi-daemon
+
+VERSION=2.2.3
+NAME=netatalk-$VERSION
+FILE=$NAME.tar.bz2
+
+cd $HOME
+[ -e $NAME ] || wget -c wget http://downloads.sourceforge.net/project/netatalk/netatalk/$VERSION/$FILE
+
+[ -e $NAME ] || tar -xvf $FILE
+cd $NAME
+./configure \
+  --sysconfdir=/etc --with-shadow \
+  --enable-krb4-uam --enable-krbV-uam \
+  --with-pam \
+  --with-cracklib=/var/cache/cracklib/cracklib_dict \
+  --enable-debian --enable-zeroconf \
+  && make && make install || exit 1
+
+cat <<EOF >/etc/avahi/services/afpd.service
+<?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+  <name replace-wildcards="yes">%h</name>
+  <service>
+    <type>_afpovertcp._tcp</type>
+    <port>548</port>
+  </service>
+  <service>
+    <type>_device-info._tcp</type>
+    <port>0</port>
+    <txt-record>model=Xserve</txt-record>
+  </service>
+</service-group>
+EOF
+/etc/init.d/avahi-daemon restart
