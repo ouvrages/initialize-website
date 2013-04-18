@@ -18,7 +18,8 @@ end
 
 IO.popen("mysql -u root --password=\"#{root_password}\"", "w") do |f|
   f.puts "CREATE DATABASE `#{database}` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_general_ci`;"
-  f.puts "GRANT ALL PRIVILEGES ON #{database}.* TO '#{user}'@'localhost' IDENTIFIED BY '#{password}' WITH GRANT OPTION;"
+  f.puts "use mysql;"
+  f.puts "GRANT ALL PRIVILEGES ON `#{database}`.* TO '#{user}'@'localhost' IDENTIFIED BY '#{password}' WITH GRANT OPTION;"
 end
 
 if dump_file
