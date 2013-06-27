@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+PKG=/tmp/puppetlabs-release-squeeze.deb
+[ -e $PKG ] || wget http://apt.puppetlabs.com/puppetlabs-release-squeeze.deb -O $PKG
+dpkg -i $PKG
+apt-get update
+apt-get install -y puppet
