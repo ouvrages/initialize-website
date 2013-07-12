@@ -3,7 +3,7 @@
 apt-get install -y ruby1.9.1 ruby1.9.1-dev
 
 for i in ruby gem irb; do
-  ln -vs ${i}1.9.1 /usr/bin/$i
+  ln -vfs ${i}1.9.1 /usr/bin/$i
 done
 
 REALLY_GEM_UPDATE_SYSTEM=true gem update --system
