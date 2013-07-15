@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Doesn't work: require virt-what which is only available on squeeze
+
+set -e
+
+[ -e /etc/apt/sources.list.d/lenny-backports.list ] || {
+  echo "deb http://archive.debian.org/debian-backports lenny-backports main" >/etc/apt/sources.list.d/lenny-backports.list
+  apt-get update
+}
+
+apt-get -t lenny-backports install -y puppet
+
+PKG=/tmp/puppetlabs-release-squeeze.deb
+[ -e $PKG ] || wget http://apt.puppetlabs.com/puppetlabs-release-squeeze.deb -O $PKG
+dpkg -i $PKG
+apt-get update
+apt-get -t squeeze install -y puppet 
